@@ -1,0 +1,19 @@
+{
+  "name": "signin-admin-console",
+  "version": "1.0.0",
+  "description": "350 Seattle Sign-In Admin Console",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Bob Kutter",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^9.4.4"
+  },
+  "dependencies": {
+    "firebase": "^8.9.0",
+    "jslint": "^0.12.1",
+    "xlsx": "^0.17.0"
+  }
+}
