@@ -64,11 +64,11 @@ function processResults(resultsStr) {
     let newContacts = agent.new_contacts;
     for (let j = 0; j < newContacts.length; j++) {
       let newbie = JSON.parse(newContacts[j]);
-      newContactsContents += newbie.last+",";
-      newContactsContents += newbie.first+",";
-      newContactsContents += newbie.emails[0]+",";
-      newContactsContents += newbie.home==="undefined" ? "," : newbie.home+",";
-      newContactsContents += newbie.cell==="undefined" ? "," : newbie.cell+",";
+      newContactsContents += newbie.last.trim()+",";
+      newContactsContents += newbie.first.trim()+",";
+      newContactsContents += newbie.emails[0].trim()+",";
+      newContactsContents += typeof(newbie.home)=="undefined" ? "," : newbie.home+",";
+      newContactsContents += typeof(newbie.cell)=="undefined" ? "," : newbie.cell+",";
       newContactsContents += agent.agent+"\n";
     }
   }

@@ -124,12 +124,6 @@ function parseStandardTextFile(fileName, doc) {
   }
   doc.contacts = contacts;
 
-  let contactsStr = JSON.stringify(contacts);
-  let compressedStr = Zlib.deflateSync(contactsStr);
-  let buff = Buffer.from(compressedStr, "utf-8");
-  let encodedStr = buff.toString("base64");
-  doc.compressed_contacts = encodedStr;
-
   return true;
 }
 
