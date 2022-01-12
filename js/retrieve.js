@@ -49,11 +49,43 @@ function submit() {
     var message = error.message;
     Tables.showResults(["retrieve error: ", message]);
   });
+  showDownloadedTables()
+}
+
+function showDownloadedTables() {
+  var tableBody = "";
+  Tables.clearResults();
+
+  tableBody += '<tr><td>blargle</td></tr>'
+
+  Tables.showMain(tableBody);
 }
 
 function processResults(resultsStr) {
+  console.log(resultsStr);
   var results = JSON.parse(resultsStr);
   var dataDir = OS.homedir();
+  console.log(resultsStr);
+  FS.writeFileSync(dataDir+"/results.json", resultsStr, "utf-8");
+
+  let newContactsTable = [];
+  var agents = results.agent_results;
+  for (let i = 0; i < agents.length; i++) {
+    let agent = agents[i];
+    let newContacts = agent.new_contacts;
+    for (let j = 0; j < newContacts.length; j++) {
+      let newbie = JSON.parse(newContacts[j]);
+      let newTableLine = [
+        newbie.last.trim(),
+        newbie.first.trim(),
+        newbie.emails[0].trim(),
+        typeof(newbie.home)=="undefined" ? "," : newbie.home,
+        typeof(newbie.cell)=="undefined" ? "," : newbie.cell
+      ]
+      newContactsTable.push(newTableLine)
+    }
+  }
+  console.log(newContactsTable)
 
   // Process new contacts since all the information is in the json.
   var newContactsContents = "Last,First,Email,Home Phone,"+
