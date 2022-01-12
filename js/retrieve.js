@@ -62,13 +62,11 @@ function showDownloadedTables() {
 }
 
 function processResults(resultsStr) {
-  console.log(resultsStr);
   var results = JSON.parse(resultsStr);
   var dataDir = OS.homedir();
-  console.log(resultsStr);
-  FS.writeFileSync(dataDir+"/results.json", resultsStr, "utf-8");
 
-  let newContactsTable = [];
+  // Process new contacts since all the information is in the json.
+  let newContactsTable = [["Last", "First", "Email", "Home Phone", "Cell Phone", "Contacted by"]];
   var agents = results.agent_results;
   for (let i = 0; i < agents.length; i++) {
     let agent = agents[i];
@@ -81,29 +79,12 @@ function processResults(resultsStr) {
         newbie.emails[0].trim(),
         typeof(newbie.home)=="undefined" ? "," : newbie.home,
         typeof(newbie.cell)=="undefined" ? "," : newbie.cell
-      ]
-      newContactsTable.push(newTableLine)
+      ];
+      newContactsTable.push(newTableLine);
     }
   }
-  console.log(newContactsTable)
 
-  // Process new contacts since all the information is in the json.
-  var newContactsContents = "Last,First,Email,Home Phone,"+
-      "Cell Phone,Contacted By\n";
-  var agents = results.agent_results;
-  for (let i = 0; i < agents.length; i++) {
-    let agent = agents[i];
-    let newContacts = agent.new_contacts;
-    for (let j = 0; j < newContacts.length; j++) {
-      let newbie = JSON.parse(newContacts[j]);
-      newContactsContents += newbie.last.trim()+",";
-      newContactsContents += newbie.first.trim()+",";
-      newContactsContents += newbie.emails[0].trim()+",";
-      newContactsContents += typeof(newbie.home)=="undefined" ? "," : newbie.home+",";
-      newContactsContents += typeof(newbie.cell)=="undefined" ? "," : newbie.cell+",";
-      newContactsContents += agent.agent+"\n";
-    }
-  }
+  var newContactsContents = tableToCSV(newContactsTable)
   FS.writeFileSync(dataDir+"/new_contacts.csv", newContactsContents, "utf-8");
 
   // Create a single array of check-ins with the agent as "Contacted by"
@@ -119,12 +100,14 @@ function processResults(resultsStr) {
   }
 
   // Call async function to go through each check-in and add first,Last
-  processCheckIn(array, 0, "VANID,Last,First,Contacted By\n");
+  let checkinTable = [["VANID", "Last", "First", "Contacted By"]];
+  processCheckIn(array, 0, checkinTable);
 }
 
-function processCheckIn(array, index, checkinContents) {
+function processCheckIn(array, index, checkinTable) {
   if (index >= array.length) {
     let dataDir = OS.homedir();
+    let checkinContents = tableToCSV(checkinTable);
     FS.writeFileSync(dataDir+"/check_ins.csv", checkinContents, "utf-8");
     Tables.showResults(["check_ins.csv and new_contacts.csv are in "+dataDir]);
     return;
@@ -137,13 +120,28 @@ function processCheckIn(array, index, checkinContents) {
   .then(
     person => {
       console.log("person "+person);
-      checkinContents += vanId+","+person.lastName+","+
-          person.firstName+","+contactedBy+"\n";
-      processCheckIn(array, index, checkinContents);
+      let newTableLine = [
+        vanId, 
+        person.lastName,
+        person.firstName,
+        contactedBy
+      ];
+      checkinTable.push(newTableLine);
+      processCheckIn(array, index, checkinTable);
     },
     error => {
       Tables.showResults([error]);
       return;
     }
   );
+}
+
+function tableToCSV(table) {
+  let csvStr = "";
+  for (let i = 0; i < table.length; i++) {
+    console.log(table[i])
+    csvStr += table[i].join(",");
+    csvStr += "\n";
+  }
+  return csvStr;
 }
