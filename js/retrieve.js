@@ -11,6 +11,8 @@ var MainWindow;
 var Functions;
 var ApiKey;
 var EventInfo;
+var newContactsTable;
+var checkinTable;
 
 exports.start = function(win, functions, apiKey, eventInfo) {
   MainWindow = win;
@@ -24,6 +26,9 @@ exports.start = function(win, functions, apiKey, eventInfo) {
 exports.passTo = function(str) {
   if (str === "submit") {
     submit();
+  }
+  else if (str === "saveTables") {
+    saveTables();
   }
 };
 
@@ -42,14 +47,18 @@ function submit() {
   retrieve({ event_id: EventInfo.id.toString() })
   .then((result) => {
     // Read result of the Cloud Function.
-    processResults(result.data);
+    processResults(result.data)
+    .then(showDownloadedTables)
+    // .catch((error) => {
+    //   var message = error.message;
+    //   Tables.showResults(["process error: ", message]);
+    // });
   })
   .catch((error) => {
     // Getting the Error details.
     var message = error.message;
     Tables.showResults(["retrieve error: ", message]);
   });
-  showDownloadedTables()
 }
 
 // retrieve.then (inherently async)
@@ -58,11 +67,12 @@ function submit() {
 // save (triggered from button)
 
 async function processResults(resultsStr) {
+  Tables.showMain("Processing...")
+
   var results = JSON.parse(resultsStr);
-  var dataDir = OS.homedir();
 
   // Process new contacts since all the information is in the json.
-  let newContactsTable = [["Last", "First", "Email", "Home Phone", "Cell Phone", "Contacted by"]];
+  newContactsTable = [["Last", "First", "Email", "Home Phone", "Cell Phone", "Contacted by"]];
   var agents = results.agent_results;
   for (let i = 0; i < agents.length; i++) {
     let agent = agents[i];
@@ -73,8 +83,8 @@ async function processResults(resultsStr) {
         newbie.last.trim(),
         newbie.first.trim(),
         newbie.emails[0].trim(),
-        typeof(newbie.home)=="undefined" ? "," : newbie.home,
-        typeof(newbie.cell)=="undefined" ? "," : newbie.cell
+        typeof(newbie.home)=="undefined" ? "" : newbie.home,
+        typeof(newbie.cell)=="undefined" ? "" : newbie.cell
       ];
       newContactsTable.push(newTableLine);
     }
@@ -96,9 +106,6 @@ async function processResults(resultsStr) {
   checkinTableRows = await Promise.all(checkinPromises);
   checkinTableHeader = [["VANID", "Last", "First", "Contacted By"]]
   checkinTable = checkinTableHeader.concat(checkinTableRows)
-
-  FS.writeFileSync(dataDir+"/new_contacts.csv", tableToCSV(newContactsTable), "utf-8");
-  FS.writeFileSync(dataDir+"/check_ins.csv", tableToCSV(checkinTable), "utf-8");
 }
 
 
@@ -116,17 +123,38 @@ function showDownloadedTables() {
   var tableBody = "";
   Tables.clearResults();
 
+  tableBody += tableToHTML(newContactsTable);
+  tableBody += tableToHTML(checkinTable);
+
   tableBody += '<tr><td><input type="button" class="three columns" value="Save Tables"' + LightBlue + 'onclick="passToEventRetrieve(\'saveTables\')"></td></tr>'
 
   Tables.showMain(tableBody);
 }
 
+function saveTables() {
+  var dataDir = OS.homedir();
+
+  FS.writeFileSync(dataDir+"/new_contacts.csv", tableToCSV(newContactsTable), "utf-8");
+  FS.writeFileSync(dataDir+"/check_ins.csv", tableToCSV(checkinTable), "utf-8");
+
+  Tables.showResults(["check_ins.csv and new_contacts.csv are in "+dataDir]);
+}
+
+function tableToHTML(table) {
+  htmlStr = "<table>";
+  htmlStr += "<tr><th>" + table[0].join("</th><th>") + "</th></tr>";
+
+  for (let i = 1; i < table.length; i++) {
+    htmlStr += "<tr><td>" + table[i].join("</td><td>") + "</td></tr>";
+  }
+
+  return htmlStr;
+}
 
 function tableToCSV(table) {
   let csvStr = "";
   for (let i = 0; i < table.length; i++) {
-    csvStr += table[i].join(",");
-    csvStr += "\n";
+    csvStr += table[i].join(",") + "\n";
   }
   return csvStr;
 }
