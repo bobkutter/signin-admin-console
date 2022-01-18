@@ -52,16 +52,12 @@ function submit() {
   showDownloadedTables()
 }
 
-function showDownloadedTables() {
-  var tableBody = "";
-  Tables.clearResults();
+// retrieve.then (inherently async)
+// process.then (def async)
+// show (has a button)
+// save (triggered from button)
 
-  tableBody += '<tr><td>blargle</td></tr>'
-
-  Tables.showMain(tableBody);
-}
-
-function processResults(resultsStr) {
+async function processResults(resultsStr) {
   var results = JSON.parse(resultsStr);
   var dataDir = OS.homedir();
 
@@ -84,62 +80,51 @@ function processResults(resultsStr) {
     }
   }
 
-  var newContactsContents = tableToCSV(newContactsTable)
-  FS.writeFileSync(dataDir+"/new_contacts.csv", newContactsContents, "utf-8");
-
   // Create a single array of check-ins with the agent as "Contacted by"
-  let array = [];
+  let checkinData = [];
   for (let i = 0; i < agents.length; i++) {
     let agent = agents[i];
     let checkins = agent.checked_in;
     for (let j = 0; j < checkins.length; j++) {
       let vanId = checkins[j];
       let checkin = { "VANID": vanId, "ContactedBy": agent.agent };
-      array.push(checkin);
+      checkinData.push(checkin);
     }
   }
 
-  // Call async function to go through each check-in and add first,Last
-  let checkinTable = [["VANID", "Last", "First", "Contacted By"]];
-  processCheckIn(array, 0, checkinTable);
+  checkinPromises = checkinData.map(singleCheckIn);
+  checkinTableRows = await Promise.all(checkinPromises);
+  checkinTableHeader = [["VANID", "Last", "First", "Contacted By"]]
+  checkinTable = checkinTableHeader.concat(checkinTableRows)
+
+  FS.writeFileSync(dataDir+"/new_contacts.csv", tableToCSV(newContactsTable), "utf-8");
+  FS.writeFileSync(dataDir+"/check_ins.csv", tableToCSV(checkinTable), "utf-8");
 }
 
-function processCheckIn(array, index, checkinTable) {
-  if (index >= array.length) {
-    let dataDir = OS.homedir();
-    let checkinContents = tableToCSV(checkinTable);
-    FS.writeFileSync(dataDir+"/check_ins.csv", checkinContents, "utf-8");
-    Tables.showResults(["check_ins.csv and new_contacts.csv are in "+dataDir]);
-    return;
-  }
 
-  let checkin = array[index++];
+async function singleCheckIn(checkin) {
   let vanId = checkin.VANID;
   let contactedBy = checkin.ContactedBy;
-  Rest.get(ApiKey, "/v4/people/"+vanId)
-  .then(
-    person => {
-      console.log("person "+person);
-      let newTableLine = [
-        vanId, 
-        person.lastName,
-        person.firstName,
-        contactedBy
-      ];
-      checkinTable.push(newTableLine);
-      processCheckIn(array, index, checkinTable);
-    },
-    error => {
-      Tables.showResults([error]);
-      return;
-    }
-  );
+
+  let person = await Rest.get(ApiKey, "/v4/people/"+vanId);
+
+  return [vanId, person.lastName, person.firstName, contactedBy];
 }
+
+
+function showDownloadedTables() {
+  var tableBody = "";
+  Tables.clearResults();
+
+  tableBody += '<tr><td><input type="button" class="three columns" value="Save Tables"' + LightBlue + 'onclick="passToEventRetrieve(\'saveTables\')"></td></tr>'
+
+  Tables.showMain(tableBody);
+}
+
 
 function tableToCSV(table) {
   let csvStr = "";
   for (let i = 0; i < table.length; i++) {
-    console.log(table[i])
     csvStr += table[i].join(",");
     csvStr += "\n";
   }
