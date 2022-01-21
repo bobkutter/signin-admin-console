@@ -49,10 +49,10 @@ function submit() {
     // Read result of the Cloud Function.
     processResults(result.data)
     .then(showDownloadedTables)
-    // .catch((error) => {
-    //   var message = error.message;
-    //   Tables.showResults(["process error: ", message]);
-    // });
+    .catch((error) => {
+      var message = error.message;
+      Tables.showResults(["process error: ", message]);
+    });
   })
   .catch((error) => {
     // Getting the Error details.
@@ -60,11 +60,6 @@ function submit() {
     Tables.showResults(["retrieve error: ", message]);
   });
 }
-
-// retrieve.then (inherently async)
-// process.then (def async)
-// show (has a button)
-// save (triggered from button)
 
 async function processResults(resultsStr) {
   Tables.showMain("Processing...")
@@ -102,6 +97,7 @@ async function processResults(resultsStr) {
     }
   }
 
+  // Retrieve all checkins
   checkinPromises = checkinData.map(singleCheckIn);
   checkinTableRows = await Promise.all(checkinPromises);
   checkinTableHeader = [["VANID", "Last", "First", "Contacted By"]]
@@ -147,6 +143,8 @@ function tableToHTML(table) {
   for (let i = 1; i < table.length; i++) {
     htmlStr += "<tr><td>" + table[i].join("</td><td>") + "</td></tr>";
   }
+
+  htmlStr += "</table>";
 
   return htmlStr;
 }
