@@ -2,7 +2,7 @@ const { BrowserWindow, app, nativeTheme } = require("electron");
 
 function createWindow () {
   // Disable system dark mode
-  nativeTheme.themeSource = "light"
+  nativeTheme.themeSource = "light";
 
   // Create the browser window.
   const win = new BrowserWindow({

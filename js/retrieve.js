@@ -45,24 +45,24 @@ function showMainScreen() {
 function submit() {
   var retrieve = Functions.httpsCallable("eventRetrieve");
   retrieve({ event_id: EventInfo.id.toString() })
-  .then((result) => {
+    .then((result) => {
     // Read result of the Cloud Function.
-    processResults(result.data)
-    .then(showDownloadedTables)
+      processResults(result.data)
+        .then(showDownloadedTables)
+        .catch((error) => {
+          var message = error.message;
+          Tables.showResults(["process error: ", message]);
+        });
+    })
     .catch((error) => {
+      // Getting the Error details.
       var message = error.message;
-      Tables.showResults(["process error: ", message]);
+      Tables.showResults(["retrieve error: ", message]);
     });
-  })
-  .catch((error) => {
-    // Getting the Error details.
-    var message = error.message;
-    Tables.showResults(["retrieve error: ", message]);
-  });
 }
 
 async function processResults(resultsStr) {
-  Tables.showMain("Processing...")
+  Tables.showResults("Processing...");
 
   var results = JSON.parse(resultsStr);
 
@@ -98,10 +98,10 @@ async function processResults(resultsStr) {
   }
 
   // Retrieve all checkins
-  checkinPromises = checkinData.map(singleCheckIn);
-  checkinTableRows = await Promise.all(checkinPromises);
-  checkinTableHeader = [["VANID", "Last", "First", "Contacted By"]]
-  checkinTable = checkinTableHeader.concat(checkinTableRows)
+  let checkinPromises = checkinData.map(singleCheckIn);
+  let checkinTableRows = await Promise.all(checkinPromises);
+  let checkinTableHeader = [["VANID", "Last", "First", "Contacted By"]];
+  checkinTable = checkinTableHeader.concat(checkinTableRows);
 }
 
 
@@ -116,15 +116,17 @@ async function singleCheckIn(checkin) {
 
 
 function showDownloadedTables() {
-  var tableBody = "";
   Tables.clearResults();
 
-  tableBody += tableToHTML(newContactsTable);
-  tableBody += tableToHTML(checkinTable);
+  let downloadButton = '<tr><td><input type="button" class="three columns" value="Save Tables"' + LightBlue + 'onclick="passToEventRetrieve(\'saveTables\')"></td></tr>';
 
-  tableBody += '<tr><td><input type="button" class="three columns" value="Save Tables"' + LightBlue + 'onclick="passToEventRetrieve(\'saveTables\')"></td></tr>'
+  let results = [
+    tableToHTML(newContactsTable),
+    tableToHTML(checkinTable),
+    downloadButton
+  ];
 
-  Tables.showMain(tableBody);
+  Tables.showResults(results);
 }
 
 function saveTables() {
@@ -137,7 +139,7 @@ function saveTables() {
 }
 
 function tableToHTML(table) {
-  htmlStr = "<table>";
+  let htmlStr = "<table>";
   htmlStr += "<tr><th>" + table[0].join("</th><th>") + "</th></tr>";
 
   for (let i = 1; i < table.length; i++) {
