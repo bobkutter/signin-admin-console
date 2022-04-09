@@ -13,15 +13,9 @@ exports.showMain = function(str) {
 };
 
 // Populates the results table
-exports.showResults = function(status) {
+exports.showResults = function(str) {
   // Generate the table body
-  let tableBody = "";
-  for (let i = 0; i < status.length; i++) {
-    tableBody += "<tr>" + status[i] + "</tr>";
-  }
-
-  // Fill the table content
-  document.getElementById("table-main-results").innerHTML = tableBody;
+  document.getElementById("table-main-results").innerHTML = str;
 };
 
 // clears the results table

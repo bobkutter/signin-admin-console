@@ -118,7 +118,10 @@ async function singleCheckIn(checkin) {
 function showDownloadedTables() {
   Tables.clearResults();
 
-  let downloadButton = '<tr><td><input type="button" class="three columns" value="Save Tables"' + LightBlue + 'onclick="passToEventRetrieve(\'saveTables\')"></td></tr>';
+  let tableBody = "";
+
+
+  let downloadButton = '<input type="button" class="three columns" value="Save Tables"' + LightBlue + 'onclick="passToEventRetrieve(\'saveTables\')">';
 
   let results = [
     tableToHTML(newContactsTable),
@@ -126,7 +129,12 @@ function showDownloadedTables() {
     downloadButton
   ];
 
-  Tables.showResults(results);
+  for (let i = 0; i < results.length; i++) {
+    tableBody += "<tr><td>" + results[i] + "</td></tr>";
+  }
+
+  Tables.showResults(tableBody);
+  // Tables.showDetails(downloadButton);
 }
 
 function saveTables() {
