@@ -36,7 +36,7 @@ function showMainScreen(fileName) {
   Tables.clearResults();
 
   if (fileName === "") {
-    fileName = getInputString("stdTxtFile","");
+    fileName = Tables.getInputString("stdTxtFile","");
   }
 
   let tableBody = ''
@@ -76,9 +76,10 @@ function handleFileOpenResult(fileName) {
 }
 
 function submit() {
-  let fileName = getInputString("stdTxtFile","No Standard Text file selected");
-  let emails = getInputString("access", "No emails for access list");
-  if (fileName === "" || emails === "") {
+  try {
+    var fileName = Tables.getInputString("stdTxtFile","No Standard Text file selected");
+    var emails = Tables.getInputString("access", "No emails for access list");
+  } catch (error) {
     return;
   }
 
@@ -159,13 +160,4 @@ function submitEventInit(funcName, doc) {
   });
 }
 
-function getInputString(elemId, errString) {
-  console.log("getting "+elemId);
-  let handle = document.getElementById(elemId);
-  if (handle === null || handle.value === "") {
-    Tables.showResults([errString]);
-    return "";
-  }
-  console.log("got "+elemId+" "+handle.value);
-  return handle.value;
-}
+

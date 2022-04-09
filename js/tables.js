@@ -55,3 +55,14 @@ exports.showDetails = function(deets) {
   // Fill the table content
   document.getElementById("table-details").innerHTML = tableBody;
 };
+
+exports.getInputString = function(elemId, errString) {
+  console.log("getting "+elemId);
+  let handle = document.getElementById(elemId);
+  if (handle === null || handle.value === "") {
+    exports.showResults([errString]);
+    throw errString;
+  }
+  console.log("got "+elemId+" "+handle.value);
+  return handle.value;
+};

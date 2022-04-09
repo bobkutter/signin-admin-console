@@ -64,7 +64,7 @@ function start() {
 function getInputValue(id, errStr) {
   let handle = document.getElementById(id);
   if (handle.value === "") {
-    Tables.showResults([errStr]);
+    Tables.showResults(errStr);
   }
   return handle.value;
 }
@@ -143,7 +143,7 @@ function getEveryActionEvent(eventId) {
       }
     },
     (error) => {
-      Tables.showResults(["Failed to get Event from Event ID: "+error]);
+      Tables.showResults("Failed to get Event from Event ID: "+error);
     }
   );
 }
