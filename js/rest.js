@@ -46,3 +46,46 @@ exports.get = function(username, path) {
     });
   });
 };
+
+exports.post = function(username, myPath, data) {
+
+  return new Promise(function(resolve, reject) {
+
+    const options = {
+      headers: {
+        "Authorization": "Basic " + new Buffer(username).toString("base64"),
+        "Content-Length": data.length,
+        "Content-Type": "application/json"
+      },
+      hostname: "api.securevan.com",
+      method: "POST",
+      path: myPath,
+      port: 443
+    };
+
+    console.log(path+" request "+data);
+    var request = Https.request(options, (result) => {
+      result.on("data", (d) => {
+        try {
+          const obj = JSON.parse(d);
+          console.log("rest result "+d);
+          if (obj.hasOwnProperty("errors")) {
+            reject(obj.errors[0].text);
+          } else {
+            resolve(obj);
+          }
+        } catch (e) {
+          console.log("parse of "+d+" failed with "+e);
+          reject(e);
+        }
+      });
+    });
+    request.on("error", (error) => {
+      console.log("send failed "+error.message);
+      reject(error);
+    });
+
+    request.write(data);
+    request.end();
+  });
+};
