@@ -1,6 +1,9 @@
-const { BrowserWindow, app } = require("electron");
+const { BrowserWindow, app, nativeTheme } = require("electron");
 
 function createWindow () {
+  // Disable system dark mode
+  nativeTheme.themeSource = "light";
+
   // Create the browser window.
   const win = new BrowserWindow({
     height: 800,
@@ -31,7 +34,7 @@ app.on("window-all-closed", () => {
     app.quit();
   }
   // Comment these lines before shipping
-  app.relaunch();
+  // app.relaunch();
   app.quit();
 });
 

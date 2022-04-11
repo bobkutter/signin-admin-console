@@ -3,6 +3,7 @@ js/fbase.js
 
 # editor junk
 js/.#*.js
+.vscode/**
 
 # Logs
 logs

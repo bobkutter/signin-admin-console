@@ -13,15 +13,9 @@ exports.showMain = function(str) {
 };
 
 // Populates the results table
-exports.showResults = function(status) {
+exports.showResults = function(str) {
   // Generate the table body
-  let tableBody = "";
-  for (let i = 0; i < status.length; i++) {
-    tableBody += "<tr>" + status[i] + "</tr>";
-  }
-
-  // Fill the table content
-  document.getElementById("table-main-results").innerHTML = tableBody;
+  document.getElementById("table-main-results").innerHTML = str;
 };
 
 // clears the results table
@@ -60,4 +54,15 @@ exports.showDetails = function(deets) {
 
   // Fill the table content
   document.getElementById("table-details").innerHTML = tableBody;
+};
+
+exports.getInputString = function(elemId, errString) {
+  console.log("getting "+elemId);
+  let handle = document.getElementById(elemId);
+  if (handle === null || handle.value === "") {
+    exports.showResults([errString]);
+    throw errString;
+  }
+  console.log("got "+elemId+" "+handle.value);
+  return handle.value;
 };
