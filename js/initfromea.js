@@ -71,7 +71,7 @@ async function prepDocuments(eventId) {
   };
 
   return docs;
-  
+
 }
 
 async function getEventInfo(eventId) {
@@ -87,7 +87,7 @@ async function getEventInfo(eventId) {
 
 async function getPeople(eventId) {
   let signups = await Rest.get(ApiKey, "/v4/signups?eventId="+eventId);
-  
+
   console.log(signups);
   let vanIds = [];
   for (let i=0; i < signups.items.length; i++) {
@@ -128,7 +128,11 @@ async function getSinglePerson(vanId) {
 
 function getAccessList() {
   let emailsStr = Tables.getInputString("access", "No emails for access list");
-  return emailsStr.split(",");
+  let emails = emailsStr.split(",");
+  for (let i = 0; i < emails.length; i++) {
+    emails[i] = emails[i].trim();
+  }
+  return emails;
 }
 
 function submitEventInit(funcName, doc) {

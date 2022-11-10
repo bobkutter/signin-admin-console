@@ -69,6 +69,7 @@ async function processResults(resultsStr) {
   // Process new contacts since all the information is in the json.
   newContactsTable = [["Last", "First", "Email", "Home Phone", "Cell Phone", "Contacted by"]];
   var agents = results.agent_results;
+  console.log("getting agents");
   for (let i = 0; i < agents.length; i++) {
     let agent = agents[i];
     let newContacts = agent.new_contacts;

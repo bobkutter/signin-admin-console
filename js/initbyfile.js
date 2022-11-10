@@ -141,7 +141,7 @@ function parseAccessList(emailsStr, accessDoc) {
   let members = [];
   let emails = emailsStr.split(",");
   for (let i = 0; i < emails.length; i+=1) {
-    members.push(emails[i]);
+    members.push(emails[i].trim());
   }
   accessDoc.members = members;
 }
@@ -159,5 +159,3 @@ function submitEventInit(funcName, doc) {
     Tables.showResults(["Initialize error: ", message]);
   });
 }
-
-
