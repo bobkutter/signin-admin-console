@@ -1,6 +1,5 @@
-
-const { access } = require('original-fs');
-const Tables = require('./tables')
+const Tables = require('./tables');
+const Rest = require('./rest');
 
 // Common button color definitions amongst all files
 const LightBlue = ' style="background-color:#33C3F0;color:#FFF" '
